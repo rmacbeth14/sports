@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Scores">
+<link rel="apple-touch-icon" href="data:image/png;base64,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">
+<title>Scores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDF1; --surface:#FFFFFF; --ink:#16202B; --muted:#5E6B78; --line:#D5DCE3; --live:#D7262E;
+  --body:"Barlow",-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --cond:"Barlow Condensed","Arial Narrow",-apple-system,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){ --bg:#0E141B; --surface:#18212B; --ink:#EEF2F6; --muted:#93A1AF; --line:#27323E; --live:#FF4D55; }
+}
+:root[data-theme="dark"]{ --bg:#0E141B; --surface:#18212B; --ink:#EEF2F6; --muted:#93A1AF; --line:#27323E; --live:#FF4D55; }
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;-webkit-font-smoothing:antialiased}
+main{max-width:560px;margin:0 auto;padding:12px 14px 40px}
+header{display:flex;align-items:flex-end;justify-content:space-between;padding:10px 4px 16px}
+h1{font-family:var(--cond);font-weight:700;font-size:44px;line-height:1;margin:0;letter-spacing:-.01em}
+#updated{color:var(--muted);font-size:14px;margin-top:4px}
+#refresh{border:0;background:var(--surface);color:var(--ink);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 1px var(--line)}
+#refresh:focus-visible{outline:3px solid #0076B6;outline-offset:2px}
+#refresh.spin svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){#refresh.spin svg{animation:none}}
+#pull{height:0;overflow:hidden;text-align:center;color:var(--muted);font-size:14px;transition:height .15s}
+
+.card{background:var(--surface);border-radius:14px;overflow:hidden;margin-bottom:14px;box-shadow:0 0 0 1px var(--line)}
+.band{background:var(--c);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:4px solid var(--a)}
+.band h2{font-family:var(--cond);font-weight:600;font-size:22px;margin:0;line-height:1.1}
+.band .rec{font-family:var(--cond);font-size:17px;opacity:.9}
+.body{padding:12px 14px 14px}
+.status{font-size:14px;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.status.live{color:var(--live);font-weight:600}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--live);animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+.row{display:flex;align-items:center;gap:10px;padding:5px 0}
+.row img{width:30px;height:30px;object-fit:contain}
+.row .nm{flex:1;font-size:17px}
+.row.us .nm{font-weight:600}
+.row .sc{font-family:var(--cond);font-weight:700;font-size:34px;line-height:1;font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}
+.row.lose .sc,.row.lose .nm{color:var(--muted)}
+.sub{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.empty{color:var(--muted);font-size:15px}
+
+.lb{width:100%;border-collapse:collapse;font-size:15px}
+.lb td{padding:6px 0;border-top:1px solid var(--line)}
+.lb tr:first-child td{border-top:0}
+.lb .pos{width:44px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lb .tp{text-align:right;font-family:var(--cond);font-weight:700;font-size:20px;font-variant-numeric:tabular-nums}
+.lb .th{text-align:right;width:56px;color:var(--muted);font-size:13px}
+.more{margin-top:8px;border:0;background:none;color:#0076B6;font:600 15px var(--body);padding:6px 0;cursor:pointer}
+.err{background:var(--surface);border-radius:14px;padding:16px;box-shadow:0 0 0 1px var(--line)}
+</style>
+</head>
+<body>
+<main>
+  <div id="pull">Release to refresh</div>
+  <header>
+    <div><h1>Scores</h1><div id="updated">Loading…</div></div>
+    <button id="refresh" aria-label="Refresh scores">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+    </button>
+  </header>
+  <div id="list"></div>
+</main>
+<script>
+const BASE = 'https://site.api.espn.com/apis/site/v2/sports/';
+// Favorites, in the order you want them shown (live games float to the top).
+const FAVS = [
+  {kind:'team', name:'Detroit Lions',       sport:'football', league:'nfl',              id:'8',   abbr:'DET',  c:'#0076B6', a:'#B0B7BC'},
+  {kind:'team', name:'Detroit Red Wings',   sport:'hockey',   league:'nhl',              id:'5',   abbr:'DET',  c:'#CE1126', a:'#7A0A12'},
+  {kind:'team', name:'Detroit Tigers',      sport:'baseball', league:'mlb',              id:'6',   abbr:'DET',  c:'#0C2340', a:'#FA4616'},
+  {kind:'golf', name:'PGA Tour',            c:'#1D3B2A', a:'#C9A94B'},
+  {kind:'team', name:'Michigan Wolverines', sport:'football', league:'college-football', id:'130', abbr:'MICH', c:'#00274C', a:'#FFCB05', sb:'?groups=80'},
+];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const scoreOf = c => { const s = c?.score; if (s == null) return ''; return typeof s === 'object' ? (s.displayValue ?? s.value ?? '') : s; };
+const statusOf = ev => ev?.status || ev?.competitions?.[0]?.status || {};
+const isUs = (c, f) => c?.team && (String(c.team.id) === f.id || c.team.abbreviation === f.abbr);
+const when = d => new Date(d).toLocaleString([], {weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'});
+const goldOpen = {};
+
+async function getJSON(url){
+  const r = await fetch(url, {cache:'no-store'});
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
+async function loadTeam(f){
+  const p = `${BASE}${f.sport}/${f.league}`;
+  const [sb, tm, sch] = await Promise.allSettled([
+    getJSON(`${p}/scoreboard${f.sb || ''}`),
+    getJSON(`${p}/teams/${f.id}`),
+    getJSON(`${p}/teams/${f.id}/schedule`)
+  ]);
+  const out = {f};
+  if (sb.status === 'fulfilled')
+    out.game = (sb.value.events || []).find(e => e.competitions?.[0]?.competitors?.some(c => isUs(c, f)));
+  if (tm.status === 'fulfilled'){
+    const t = tm.value.team || {};
+    out.record = t.record?.items?.[0]?.summary || '';
+    out.next = t.nextEvent?.[0];
+  }
+  if (sch.status === 'fulfilled'){
+    const now = Date.now();
+    out.last = (sch.value.events || [])
+      .filter(e => statusOf(e).type?.completed && new Date(e.date) <= now)
+      .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+  }
+  out.error = sb.status === 'rejected' && tm.status === 'rejected';
+  out.primary = out.game || out.next;
+  out.live = statusOf(out.primary).type?.state === 'in';
+  return out;
+}
+
+async function loadGolf(f){
+  const d = await getJSON(BASE + 'golf/pga/scoreboard');
+  const ev = d.events?.[0];
+  return {f, ev, live: statusOf(ev).type?.state === 'in'};
+}
+
+function statusLine(ev){
+  const st = statusOf(ev).type || {};
+  if (st.state === 'in') return `<div class="status live"><span class="dot"></span>Live, ${esc(st.shortDetail)}</div>`;
+  if (st.state === 'post') return `<div class="status">${esc(st.shortDetail || 'Final')}</div>`;
+  const comp = ev.competitions?.[0];
+  const tv = comp?.broadcasts?.[0]?.names?.[0] || comp?.geoBroadcasts?.[0]?.media?.shortName || '';
+  return `<div class="status">${esc(when(ev.date))}${tv ? ', ' + esc(tv) : ''}</div>`;
+}
+
+function summary(ev, f, label){
+  const comp = ev?.competitions?.[0]; if (!comp) return '';
+  const us = comp.competitors.find(c => isUs(c, f)), them = comp.competitors.find(c => !isUs(c, f));
+  if (!us || !them) return '';
+  const where = us.homeAway === 'home' ? 'vs' : 'at';
+  if (statusOf(ev).type?.completed){
+    const r = us.winner ? 'W' : them.winner ? 'L' : 'T';
+    return `${label}: ${r} ${esc(scoreOf(us))}–${esc(scoreOf(them))} ${where} ${esc(them.team.abbreviation)}`;
+  }
+  return `${label}: ${where} ${esc(them.team.abbreviation)}, ${esc(when(ev.date))}`;
+}
+
+function teamCard(d){
+  const {f} = d;
+  let html = '';
+  if (d.error) html = `<p class="empty">Scores couldn't load. Check your connection and tap refresh.</p>`;
+  else if (!d.primary){
+    html = `<p class="empty">No upcoming games scheduled.</p>`;
+    if (d.last) html += `<div class="sub">${summary(d.last, f, 'Last')}</div>`;
+  } else {
+    const ev = d.primary, comp = ev.competitions[0], state = statusOf(ev).type?.state;
+    const teams = [...comp.competitors].sort((a, b) => (a.homeAway === 'away' ? -1 : 1));
+    html = statusLine(ev) + teams.map(c => {
+      const logo = c.team.logo || c.team.logos?.[0]?.href || '';
+      const lose = state === 'post' && !c.winner && teams.some(t => t.winner);
+      return `<div class="row${isUs(c, f) ? ' us' : ''}${lose ? ' lose' : ''}">
+        ${logo ? `<img src="${esc(logo)}" alt="">` : ''}
+        <span class="nm">${esc(c.team.shortDisplayName || c.team.displayName)}</span>
+        <span class="sc">${state === 'pre' ? '' : esc(scoreOf(c))}</span></div>`;
+    }).join('');
+    let sub = '';
+    if (state === 'post' && d.next && d.next.id !== ev.id) sub = summary(d.next, f, 'Next');
+    else if (state !== 'post' && d.last && d.last.id !== ev.id) sub = summary(d.last, f, 'Last');
+    if (sub) html += `<div class="sub">${sub}</div>`;
+  }
+  return frame(f, d.record, html);
+}
+
+function golfCard(d){
+  const {f, ev} = d;
+  if (!ev) return frame(f, '', `<p class="empty">No tournament this week.</p>`);
+  const st = statusOf(ev).type || {};
+  const comp = ev.competitions?.[0] || {};
+  const players = [...(comp.competitors || [])].sort((a, b) => (a.sortOrder ?? a.order ?? 999) - (b.sortOrder ?? b.order ?? 999));
+  let html = `<div style="font-weight:600;font-size:17px;margin-bottom:2px">${esc(ev.name || ev.shortName)}</div>`;
+  if (st.state === 'pre' || !players.length || !scoreOf(players[0])){
+    html += `<div class="status">Starts ${esc(when(ev.date))}</div>`;
+  } else {
+    html += st.state === 'in'
+      ? `<div class="status live"><span class="dot"></span>${esc(st.shortDetail || 'In progress')}</div>`
+      : `<div class="status">${esc(st.shortDetail || 'Final')}</div>`;
+    const n = goldOpen.all ? players.length : 10;
+    html += `<table class="lb">` + players.slice(0, n).map(p => {
+      const pos = p.status?.position?.displayName || p.order || '';
+      const thru = p.status?.thru != null && st.state === 'in' ? (p.status.thru >= 18 ? 'F' : 'Thru ' + p.status.thru) : '';
+      return `<tr><td class="pos">${esc(pos)}</td><td>${esc(p.athlete?.displayName || p.athlete?.shortName)}</td><td class="th">${esc(thru)}</td><td class="tp">${esc(scoreOf(p))}</td></tr>`;
+    }).join('') + `</table>`;
+    if (players.length > 10)
+      html += `<button class="more" onclick="goldOpen.all=!goldOpen.all;render()">${goldOpen.all ? 'Show top 10' : 'Show full leaderboard'}</button>`;
+  }
+  return frame(f, '', html);
+}
+
+function frame(f, rec, inner){
+  return `<section class="card" style="--c:${f.c};--a:${f.a}">
+    <div class="band"><h2>${esc(f.name)}</h2>${rec ? `<span class="rec">${esc(rec)}</span>` : ''}</div>
+    <div class="body">${inner}</div></section>`;
+}
+
+let data = [], timer = null;
+function render(){
+  const ordered = [...data].sort((a, b) => (b.live - a.live) || (FAVS.indexOf(a.f) - FAVS.indexOf(b.f)));
+  $('#list').innerHTML = ordered.map(d => d.f.kind === 'golf' ? golfCard(d) : teamCard(d)).join('');
+}
+
+async function refresh(){
+  $('#refresh').classList.add('spin');
+  const results = await Promise.all(FAVS.map(f =>
+    (f.kind === 'golf' ? loadGolf(f) : loadTeam(f)).catch(() => ({f, error:true, live:false}))
+  ));
+  data = results;
+  render();
+  $('#updated').textContent = 'Updated ' + new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  $('#refresh').classList.remove('spin');
+  clearTimeout(timer);
+  timer = setTimeout(refresh, data.some(d => d.live) ? 30000 : 300000); // 30s when live, 5 min otherwise
+}
+
+$('#refresh').addEventListener('click', refresh);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+
+// Pull down to refresh
+let y0 = null;
+addEventListener('touchstart', e => { y0 = scrollY <= 0 ? e.touches[0].clientY : null; }, {passive:true});
+addEventListener('touchmove', e => { if (y0 != null) $('#pull').style.height = (e.touches[0].clientY - y0 > 70 ? 28 : 0) + 'px'; }, {passive:true});
+addEventListener('touchend', () => { if ($('#pull').style.height === '28px') refresh(); $('#pull').style.height = '0'; y0 = null; });
+
+refresh();
+</script>
+</body>
+</html>
