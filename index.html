@@ -111,6 +111,17 @@ nav button[aria-current="page"]{color:var(--link);font-weight:600}
 .plays .meta{color:var(--muted);font-size:13px}
 .scroll{overflow-x:auto}
 
+.mini .row{padding:3px 0}
+.mini .row img{width:24px;height:24px}
+.mini .row .nm{font-size:16px}
+.mini .row .sc{font-size:26px}
+.rk{font-size:12px;color:var(--muted);font-weight:600;margin-right:3px}
+.recs{font-size:12px;color:var(--muted);margin-left:4px}
+.ctrl{display:flex;gap:8px}
+.ctrl select{flex:1}
+.step{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.step b{font-family:var(--cond);font-size:20px;font-weight:600}
+.favline{box-shadow:inset 4px 0 0 var(--link)}
 .setrow{display:flex;align-items:center;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
 .setrow:first-child{border-top:0}
 .setrow .sw{width:14px;height:28px;border-radius:4px;background:var(--c);flex:none}
@@ -137,6 +148,7 @@ select,input[type=text]{width:100%;font:inherit;padding:10px;border-radius:10px;
 
 <nav>
   <button data-view="scores" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14M7 10v4M17 10v4"/></svg>Scores</button>
+  <button data-view="league"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>League</button>
   <button data-view="standings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Standings</button>
   <button data-view="settings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17.3l-6.2 3.7 1.6-7L2 9.2l7.2-.6L12 2l2.8 6.6 7.2.6-5.4 4.8 1.6 7z"/></svg>Favorites</button>
 </nav>
@@ -383,7 +395,9 @@ function periodLabel(sport, league, n){
   return n === reg + 1 ? 'OT' : (n - reg) + 'OT';
 }
 async function openGame(key, eventId){
-  const f = favByKey(key); if (!f) return;
+  const lg = key.startsWith('lg:') ? key.slice(3) : null;
+  const f = favByKey(key) || (lg && LEAGUES[lg] ? {kind:'team', league:lg, name:LEAGUES[lg].label} : null);
+  if (!f) return;
   detail = {f, eventId};
   $('#sheetTitle').textContent = f.name;
   $('#sheetBody').innerHTML = '<p class="empty">Loading…</p>';
@@ -653,6 +667,84 @@ async function pickLeague(lg){
   if (teamLeague === lg) renderSettings();
 }
 
+/* ---------- League scores ---------- */
+const LEAGUE_GROUPS = {
+  'college-football':        [['top25','Top 25'],['1','ACC'],['5','Big Ten'],['4','Big 12'],['9','Pac-12'],['8','SEC']],
+  'mens-college-basketball': [['top25','Top 25'],['2','ACC'],['4','Big East'],['7','Big Ten'],['8','Big 12'],['21','Pac-12'],['23','SEC']],
+};
+let lgSel = store.get('lgSel', {league:'nfl', group:'top25'});
+if (!LEAGUES[lgSel.league]) lgSel = {league:'nfl', group:'top25'};
+let lgData = null, lgAt = 0, lgOffset = 0, lgBase = null;
+const isFootball = () => LEAGUES[lgSel.league].sport === 'football';
+const ymd = d => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+function lgDay(){ const d = new Date(); d.setDate(d.getDate() + lgOffset); return d; }
+function lgURL(){
+  const L = LEAGUES[lgSel.league], q = ['limit=300'];
+  if (L.college) q.push('groups=' + (lgSel.group === 'top25' ? (lgSel.league === 'college-football' ? '80' : '50') : lgSel.group));
+  if (isFootball()){ if (lgOffset && lgBase) q.push('week=' + Math.max(1, lgBase.week + lgOffset), 'seasontype=' + lgBase.type); }
+  else if (lgOffset) q.push('dates=' + ymd(lgDay()));
+  return `${BASE}${L.sport}/${lgSel.league}/scoreboard?` + q.join('&');
+}
+const rankOf = c => { const r = c.curatedRank?.current; return r >= 1 && r <= 25 ? r : null; };
+async function loadLeague(){
+  const want = lgURL();
+  try {
+    const d = await getJSON(want);
+    if (want !== lgURL()) return;
+    if (isFootball() && !lgOffset && d.week?.number) lgBase = {week: d.week.number, type: d.season?.type || 2};
+    let evs = d.events || [];
+    if (LEAGUES[lgSel.league].college && lgSel.group === 'top25')
+      evs = evs.filter(e => e.competitions?.[0]?.competitors?.some(rankOf));
+    const rank = e => ({in:0, pre:1, post:2})[statusOf(e).type?.state] ?? 1;
+    evs.sort((a, b) => rank(a) - rank(b) || new Date(a.date) - new Date(b.date));
+    lgData = {events: evs, week: d.week?.number, error: false};
+  } catch { lgData = {events: [], error: true}; }
+  lgAt = Date.now();
+}
+function lgLabel(){
+  if (isFootball()){
+    const w = lgBase ? Math.max(1, lgBase.week + lgOffset) : lgData?.week;
+    return w ? (lgBase?.type === 3 ? 'Postseason week ' : 'Week ') + w : 'This week';
+  }
+  if (!lgOffset) return 'Today';
+  if (lgOffset === -1) return 'Yesterday';
+  if (lgOffset === 1) return 'Tomorrow';
+  return lgDay().toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
+}
+function renderLeague(){
+  const L = LEAGUES[lgSel.league], groups = LEAGUE_GROUPS[lgSel.league];
+  let html = `<section class="card"><div class="body">
+    <div class="ctrl">
+      <select id="lgl" aria-label="League">${Object.entries(LEAGUES).map(([k, v]) => `<option value="${k}" ${k === lgSel.league ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select>
+      ${groups ? `<select id="lgg" aria-label="Conference or Top 25">${groups.map(([k, v]) => `<option value="${k}" ${k === lgSel.group ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>` : ''}
+    </div>
+    <div class="step"><button class="ib" data-act="lgprev" aria-label="Previous ${isFootball() ? 'week' : 'day'}">‹</button><b>${esc(lgLabel())}</b><button class="ib" data-act="lgnext" aria-label="Next ${isFootball() ? 'week' : 'day'}">›</button></div>
+  </div></section>`;
+  if (!lgData) html += '<p class="empty">Loading games…</p>';
+  else if (lgData.error) html += `<p class="empty">Games couldn't load. Check your connection and tap refresh.</p>`;
+  else if (!lgData.events.length) html += `<p class="empty">No ${groups ? esc(groups.find(g => g[0] === lgSel.group)?.[1] || '') + ' ' : ''}games ${isFootball() ? 'this week' : lgOffset ? 'on this day' : 'today'}.</p>`;
+  else {
+    const favIds = favs.filter(f => f.league === lgSel.league).map(f => String(f.id));
+    html += lgData.events.map(ev => {
+      const comp = ev.competitions?.[0] || {}, state = statusOf(ev).type?.state;
+      const teams = [...(comp.competitors || [])].sort(a => (a.homeAway === 'away' ? -1 : 1));
+      const mine = teams.some(c => favIds.includes(String(c.team?.id)));
+      return `<section class="card mini${mine ? ' favline' : ''}"><div class="body tap" role="button" tabindex="0" data-open="lg:${esc(lgSel.league)}|${esc(ev.id)}">` +
+        statusLine(ev) + teams.map(c => {
+          const lose = state === 'post' && !c.winner && teams.some(t => t.winner);
+          const rk = L.college ? rankOf(c) : null;
+          const rec = c.records?.[0]?.summary;
+          return `<div class="row${lose ? ' lose' : ''}${favIds.includes(String(c.team?.id)) ? ' us' : ''}">
+            ${c.team?.logo ? `<img src="${esc(c.team.logo)}" alt="">` : ''}
+            <span class="nm">${rk ? `<span class="rk">${rk}</span>` : ''}${esc(c.team?.shortDisplayName || c.team?.displayName)}${rec ? `<span class="recs">${esc(rec)}</span>` : ''}</span>
+            <span class="sc">${state === 'pre' ? '' : esc(scoreOf(c))}</span></div>`;
+        }).join('') + (state === 'in' ? situationHTML(comp.situation, comp.competitors, L.sport) : '') + `</div></section>`;
+    }).join('');
+  }
+  $('#list').innerHTML = html;
+}
+function lgChanged(){ lgOffset = 0; lgBase = null; lgData = null; store.set('lgSel', lgSel); renderLeague(); refresh(); }
+
 /* ---------- App shell ---------- */
 let view = 'scores', scores = store.get('cache:scores', []), scoresAt = store.get('cache:scoresAt', 0), timer = null, fromCache = scores.length > 0;
 function renderScores(){
@@ -664,17 +756,18 @@ function renderScores(){
       : favs.length ? '<p class="empty">Loading…</p>' : '<p class="empty">Add favorites in the Favorites tab.</p>');
 }
 function render(){
-  $('#title').textContent = {scores:'Scores', standings:'Standings', settings:'Favorites'}[view];
+  $('#title').textContent = {scores:'Scores', league:'League', standings:'Standings', settings:'Favorites'}[view];
   $('#refresh').style.visibility = view === 'settings' ? 'hidden' : 'visible';
   document.querySelectorAll('nav button').forEach(b => b.toggleAttribute('aria-current', b.dataset.view === view));
   document.querySelectorAll('nav button[aria-current]').forEach(b => b.setAttribute('aria-current', 'page'));
   if (view === 'scores') renderScores();
+  else if (view === 'league') renderLeague();
   else if (view === 'standings') renderStandings();
   else renderSettings();
   setUpdated();
 }
 function setUpdated(){
-  const t = view === 'standings' ? standings?.at : scoresAt;
+  const t = view === 'standings' ? standings?.at : view === 'league' ? lgAt : scoresAt;
   $('#updated').textContent = view === 'settings' ? 'Tap ↑ ↓ to reorder' : t ? 'Updated ' + clock(t) : 'Loading…';
 }
 let busy = false;
@@ -683,6 +776,7 @@ async function refresh(){
   $('#refresh').classList.add('spin');
   try {
     if (view === 'standings'){ await refreshStandings(); }
+    else if (view === 'league'){ await loadLeague(); }
     else {
       const res = await Promise.all(favs.map(f =>
         (f.kind === 'golf' ? loadGolf() : loadTeam(f)).catch(() => ({key: keyOf(f), error: true, live: false}))));
@@ -693,8 +787,10 @@ async function refresh(){
     busy = false;
     $('#refresh').classList.remove('spin');
     if (view !== 'settings') render();
+    if (view === 'league' && !lgData) setTimeout(refresh, 0);
     clearTimeout(timer);
-    timer = setTimeout(refresh, scores.some(d => d.live) ? 30000 : 300000);
+    const anyLive = view === 'league' ? (lgData?.events || []).some(e => statusOf(e).type?.state === 'in') : scores.some(d => d.live);
+    timer = setTimeout(refresh, anyLive ? 30000 : 300000);
   }
 }
 
@@ -705,12 +801,14 @@ document.addEventListener('click', e => {
     view = t.dataset.view; window.scrollTo(0, 0); render();
     if (view === 'standings' && (!standings || Date.now() - standings.at > 600000)) refresh();
     if (view === 'scores' && Date.now() - scoresAt > 60000) refresh();
+    if (view === 'league' && (!lgData || Date.now() - lgAt > 60000)) refresh();
     return;
   }
   if (t.dataset.open){ const [k, id] = t.dataset.open.split('|'); openGame(k, id); return; }
   if (t.dataset.player){ const id = t.dataset.player; openPlayers.has(id) ? openPlayers.delete(id) : openPlayers.add(id); renderScores(); return; }
   const act = t.dataset.act, i = Number(t.dataset.i);
-  if (act === 'golfall'){ golfShowAll = !golfShowAll; renderScores(); }
+  if (act === 'lgprev' || act === 'lgnext'){ lgOffset += act === 'lgprev' ? -1 : 1; lgData = null; renderLeague(); refresh(); }
+  else if (act === 'golfall'){ golfShowAll = !golfShowAll; renderScores(); }
   else if (act === 'parent'){ const k = t.dataset.key; openParents.has(k) ? openParents.delete(k) : openParents.add(k); renderStandings(); }
   else if (act === 'up' && i > 0){ [favs[i - 1], favs[i]] = [favs[i], favs[i - 1]]; saveFavs(); renderSettings(); }
   else if (act === 'down' && i < favs.length - 1){ [favs[i + 1], favs[i]] = [favs[i], favs[i + 1]]; saveFavs(); renderSettings(); }
@@ -736,7 +834,11 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.id === 'golfer'){ e.preventDefault(); document.querySelector('[data-act="addgolfer"]').click(); }
   if (e.key === 'Escape' && !$('#sheet').hidden) closeGame();
 });
-document.addEventListener('change', e => { if (e.target.id === 'lg') pickLeague(e.target.value); });
+document.addEventListener('change', e => {
+  if (e.target.id === 'lg') pickLeague(e.target.value);
+  if (e.target.id === 'lgl'){ lgSel = {league: e.target.value, group: 'top25'}; lgChanged(); }
+  if (e.target.id === 'lgg'){ lgSel.group = e.target.value; lgChanged(); }
+});
 $('#refresh').addEventListener('click', refresh);
 $('#sheetClose').addEventListener('click', closeGame);
 document.addEventListener('visibilitychange', () => {
