@@ -91,7 +91,7 @@ tr:first-child td{border-top:0}
 a{color:var(--link)}
 
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
-nav button{flex:1;max-width:186px;border:0;background:none;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);cursor:pointer}
+nav button{flex:1;max-width:120px;border:0;background:none;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);cursor:pointer}
 nav button[aria-current="page"]{color:var(--link);font-weight:600}
 
 #sheet{position:fixed;inset:0;background:var(--bg);z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -122,6 +122,25 @@ nav button[aria-current="page"]{color:var(--link);font-weight:600}
 .step{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .step b{font-family:var(--cond);font-size:20px;font-weight:600}
 .favline{box-shadow:inset 4px 0 0 var(--link)}
+.day{font-family:var(--cond);font-weight:600;font-size:19px;margin:18px 4px 6px}
+.day:first-child{margin-top:0}
+.srow{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line)}
+.srow:first-child{border-top:0}
+.srow .tm{width:64px;flex:none;font-variant-numeric:tabular-nums;font-size:14px;color:var(--muted)}
+.srow .tm.live{color:var(--live);font-weight:600}
+.srow .sw{width:6px;align-self:stretch;border-radius:3px;background:var(--c);flex:none}
+.srow .what{flex:1;font-size:15px}
+.srow .what small{display:block;color:var(--muted);font-size:13px}
+.news{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line);text-decoration:none;color:inherit}
+.news:first-child{border-top:0}
+.news img{width:72px;height:54px;object-fit:cover;border-radius:6px;flex:none}
+.news b{font-weight:600;font-size:15px;display:block}
+.news small{color:var(--muted);font-size:13px}
+.inj{padding:8px 0;border-top:1px solid var(--line);font-size:15px}
+.inj:first-child{border-top:0}
+.inj .st{font-weight:600}
+.inj .st.out{color:var(--live)}
+.inj small{display:block;color:var(--muted);font-size:13px}
 .setrow{display:flex;align-items:center;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
 .setrow:first-child{border-top:0}
 .setrow .sw{width:14px;height:28px;border-radius:4px;background:var(--c);flex:none}
@@ -148,6 +167,7 @@ select,input[type=text]{width:100%;font:inherit;padding:10px;border-radius:10px;
 
 <nav>
   <button data-view="scores" aria-current="page"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 5v14M7 10v4M17 10v4"/></svg>Scores</button>
+  <button data-view="schedule"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Schedule</button>
   <button data-view="league"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>League</button>
   <button data-view="standings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Standings</button>
   <button data-view="settings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17.3l-6.2 3.7 1.6-7L2 9.2l7.2-.6L12 2l2.8 6.6 7.2.6-5.4 4.8 1.6 7z"/></svg>Favorites</button>
@@ -166,18 +186,25 @@ const LEAGUES = {
   'nfl':                     {sport:'football',   label:'NFL'},
   'college-football':        {sport:'football',   label:'College football', sb:'?groups=80', tl:'?groups=80&limit=400', college:true},
   'nba':                     {sport:'basketball', label:'NBA'},
-  'wnba':                    {sport:'basketball', label:'WNBA'},
   'mens-college-basketball': {sport:'basketball', label:"Men's college basketball", sb:'?groups=50', tl:'?groups=50&limit=400', college:true},
   'nhl':                     {sport:'hockey',     label:'NHL'},
   'mlb':                     {sport:'baseball',   label:'MLB'},
-  'usa.1':                   {sport:'soccer',     label:'MLS'},
+  'eng.1':                   {sport:'soccer',     label:'Premier League'},
 };
+const TOURS = {
+  pga:  {label:'PGA Tour',      c:'#1D3B2A', a:'#C9A94B'},
+  lpga: {label:'LPGA Tour',     c:'#1B3C73', a:'#C8102E'},
+  eur:  {label:'DP World Tour', c:'#0E1C3D', a:'#00A3E0'},
+};
+const golfFav = t => ({kind:'golf', tour:t, name:TOURS[t].label, c:TOURS[t].c, a:TOURS[t].a});
 const DEFAULT_FAVS = [
   {kind:'team', league:'nfl', id:'8', abbr:'DET', name:'Detroit Lions', c:'#0076B6', a:'#B0B7BC'},
   {kind:'team', league:'nhl', id:'5', abbr:'DET', name:'Detroit Red Wings', c:'#CE1126', a:'#7A0A12'},
   {kind:'team', league:'mlb', id:'6', abbr:'DET', name:'Detroit Tigers', c:'#0C2340', a:'#FA4616'},
-  {kind:'golf', name:'PGA Tour', c:'#1D3B2A', a:'#C9A94B'},
+  golfFav('pga'),
   {kind:'team', league:'college-football', id:'130', abbr:'MICH', name:'Michigan Wolverines', c:'#00274C', a:'#FFCB05'},
+  golfFav('lpga'),
+  golfFav('eur'),
 ];
 
 const store = {
@@ -186,11 +213,17 @@ const store = {
 };
 let favs = store.get('favs', DEFAULT_FAVS);
 let golfers = store.get('golfers', []);
+// Upgrade saved favorites: tag golf with a tour, drop leagues no longer offered, add the new tours once.
+favs = favs.map(f => f.kind === 'golf' && !f.tour ? {...f, tour:'pga'} : f).filter(f => f.kind === 'golf' ? TOURS[f.tour] : LEAGUES[f.league]);
+if (!store.get('mig4', false)){
+  for (const t of ['lpga', 'eur']) if (!favs.some(f => f.kind === 'golf' && f.tour === t)) favs.push(golfFav(t));
+  store.set('mig4', true); store.set('favs', favs);
+}
 const saveFavs = () => { store.set('favs', favs); store.set('golfers', golfers); };
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const keyOf = f => f.kind === 'golf' ? 'golf' : f.league + ':' + f.id;
+const keyOf = f => f.kind === 'golf' ? 'golf:' + f.tour : f.league + ':' + f.id;
 const favByKey = k => favs.find(f => keyOf(f) === k);
 const sportOf = f => LEAGUES[f.league]?.sport;
 const api = f => `${BASE}${sportOf(f)}/${f.league}`;
@@ -225,20 +258,28 @@ async function loadTeam(f){
     out.next = t.nextEvent?.[0];
   }
   if (sch.status === 'fulfilled'){
-    const now = Date.now();
+    const now = Date.now(), horizon = now + 14 * 864e5;
+    out.upcoming = (sch.value.events || []).filter(e => !statusOf(e).type?.completed && new Date(e.date) > now - 5 * 36e5 && new Date(e.date) < horizon);
     out.last = (sch.value.events || [])
       .filter(e => statusOf(e).type?.completed && new Date(e.date) <= now)
       .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
   }
   out.error = sb.status === 'rejected' && tm.status === 'rejected';
   out.primary = out.game || out.next;
+  out.upcoming = out.upcoming || [];
+  for (const e of [out.game, out.next]) if (e && !statusOf(e).type?.completed && new Date(e.date) < Date.now() + 14 * 864e5 && !out.upcoming.some(u => u.id === e.id)) out.upcoming.push(e);
   out.live = statusOf(out.primary).type?.state === 'in';
   return out;
 }
-async function loadGolf(){
-  const d = await getJSON(BASE + 'golf/pga/scoreboard');
+async function loadGolf(f){
+  const d = await getJSON(BASE + 'golf/' + f.tour + '/scoreboard');
   const ev = d.events?.[0];
-  return {key:'golf', ev, live: statusOf(ev).type?.state === 'in'};
+  const now = Date.now(), horizon = now + 14 * 864e5;
+  const cal = (d.leagues?.[0]?.calendar || []).filter(c => c && typeof c === 'object' && c.startDate)
+    .filter(c => new Date(c.endDate || c.startDate) >= now - 864e5 && new Date(c.startDate) < horizon)
+    .map(c => ({label: c.label, start: c.startDate, end: c.endDate}));
+  if (ev && !cal.some(c => c.label === ev.name) && new Date(ev.date) < horizon) cal.unshift({label: ev.name, start: ev.date, end: ev.endDate});
+  return {key: keyOf(f), ev, cal, live: statusOf(ev).type?.state === 'in'};
 }
 
 /* ---------- Live situation ---------- */
@@ -316,11 +357,12 @@ function teamCard(d, f){
     else if (state !== 'post' && d.last && d.last.id !== ev.id){ subEv = d.last; sub = summary(d.last, f, 'Last'); }
     if (sub) html += `<div class="sub tap" role="button" tabindex="0" data-open="${esc(keyOf(f))}|${esc(subEv.id)}">${sub}</div>`;
   }
+  html += `<button class="link" data-team="${esc(keyOf(f))}">News and injuries ›</button>`;
   return frame(f, d.record, html);
 }
 
 const openPlayers = new Set();
-let golfShowAll = false;
+const golfShowAll = new Set();
 function golferRow(p, st, pinned){
   const pid = String(p.id || p.athlete?.id || p.athlete?.displayName);
   const pos = p.status?.position?.displayName || p.order || '';
@@ -375,9 +417,9 @@ function golfCard(d, f){
       : `<p class="empty">None of your players are in this week's field.</p>`;
   }
   if (started){
-    const n = golfShowAll ? players.length : 10;
+    const showAll = golfShowAll.has(keyOf(f)), n = showAll ? players.length : 10;
     html += `<div class="subhead">Leaderboard</div><table class="lb">${players.slice(0, n).map(p => golferRow(p, st, false)).join('')}</table>`;
-    if (players.length > 10) html += `<button class="link" data-act="golfall">${golfShowAll ? 'Show top 10' : 'Show full leaderboard'}</button>`;
+    if (players.length > 10) html += `<button class="link" data-act="golfall" data-key="${esc(keyOf(f))}">${showAll ? 'Show top 10' : 'Show full leaderboard'}</button>`;
   }
   return frame(f, '', html);
 }
@@ -406,7 +448,7 @@ async function openGame(key, eventId){
   await loadDetail();
 }
 function closeGame(){
-  $('#sheet').hidden = true; document.body.style.overflow = '';
+  $('#sheet').hidden = true; document.body.style.overflow = ''; $('#sheetTitle').textContent = '';
   detail = null; clearTimeout(detailTimer);
 }
 async function loadDetail(){
@@ -588,6 +630,7 @@ function renderStandings(){
   let html = '';
   for (const f of favs){
     if (f.kind === 'golf'){
+      if (f.tour !== 'pga') continue;
       const fx = standings.fedex;
       html += frame(f, '', fx && fx.entries ? `<div class="subhead">${esc(fx.name)}</div><table>` +
         fx.entries.map((e, i) => `<tr><td class="num" style="width:36px">${esc(statVal(e, 'rank') ?? i + 1)}</td><td>${esc(e.athlete?.displayName || e.team?.displayName || e.displayName)}</td><td class="num">${esc(statVal(e, 'points') ?? statVal(e, 'cupPoints') ?? '')}</td></tr>`).join('') + `</table>`
@@ -622,7 +665,7 @@ async function refreshStandings(){
   const res = await Promise.all(teams.map(loadStandingsFor));
   const colleges = [...new Set(teams.filter(f => LEAGUES[f.league].college).map(f => f.league))];
   const rk = await Promise.all(colleges.map(l => loadRankings(l).catch(() => null)));
-  const fedex = favs.some(f => f.kind === 'golf') ? await loadFedex().catch(() => null) : null;
+  const fedex = favs.some(f => f.kind === 'golf' && f.tour === 'pga') ? await loadFedex().catch(() => null) : null;
   standings = {teams: Object.fromEntries(res.map(r => [r.key, r])), rankings: Object.fromEntries(colleges.map((l, i) => [l, rk[i]])), fedex, at: Date.now()};
   store.set('cache:standings', standings);
 }
@@ -635,7 +678,7 @@ function renderSettings(){
     <button class="ib" data-act="up" data-i="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Move up">↑</button>
     <button class="ib" data-act="down" data-i="${i}" ${i === favs.length - 1 ? 'disabled' : ''} aria-label="Move down">↓</button>
     <button class="ib" data-act="remove" data-i="${i}" aria-label="Remove ${esc(f.name)}">✕</button></div>`).join('');
-  const field = (scores.find(d => d.key === 'golf')?.ev?.competitions?.[0]?.competitors || []).map(p => p.athlete?.displayName).filter(Boolean);
+  const field = [...new Set(scores.filter(d => d.key?.startsWith('golf')).flatMap(d => d.ev?.competitions?.[0]?.competitors || []).map(p => p.athlete?.displayName).filter(Boolean))];
   $('#list').innerHTML = `
     <section class="card"><div class="body"><div class="subhead">Your favorites</div>${rows || '<p class="empty">No favorites yet. Add a team below.</p>'}</div></section>
     <section class="card"><div class="body"><div class="subhead">Add a team</div>
@@ -644,7 +687,7 @@ function renderSettings(){
       <label for="tm" class="status">Team</label>
       <select id="tm" ${teamList.length ? '' : 'disabled'}>${teamList.length ? teamList.map(t => `<option value="${esc(t.id)}">${esc(t.displayName)}</option>`).join('') : '<option>Choose a league first</option>'}</select>
       <button class="btn" data-act="addteam" ${teamList.length ? '' : 'disabled'}>Add team</button>
-      ${favs.some(f => f.kind === 'golf') ? '' : `<div style="margin-top:12px"><button class="btn" data-act="addgolf">Add PGA Tour leaderboard</button></div>`}
+      ${(() => { const left = Object.keys(TOURS).filter(t => !favs.some(f => f.kind === 'golf' && f.tour === t)); return left.length ? `<div class="subhead" style="margin-top:16px">Add a golf tour</div><select id="tour" aria-label="Golf tour">${left.map(t => `<option value="${t}">${esc(TOURS[t].label)}</option>`).join('')}</select><button class="btn" data-act="addgolf">Add tour</button>` : ''; })()}
     </div></section>
     <section class="card"><div class="body"><div class="subhead">Your golfers</div>
       <p class="empty" style="font-size:14px;margin-bottom:8px">These players are pinned to the top of the leaderboard whenever they're in the field.</p>
@@ -665,6 +708,91 @@ async function pickLeague(lg){
     teamList = (d.sports?.[0]?.leagues?.[0]?.teams || []).map(x => x.team).filter(Boolean).sort((a, b) => a.displayName.localeCompare(b.displayName));
   } catch { teamList = []; alert('Teams couldn\'t load. Check your connection and try again.'); }
   if (teamLeague === lg) renderSettings();
+}
+
+/* ---------- Schedule ---------- */
+function renderSchedule(){
+  const byKey = Object.fromEntries(scores.map(d => [d.key, d]));
+  const items = [];
+  for (const f of favs){
+    const d = byKey[keyOf(f)]; if (!d) continue;
+    if (f.kind === 'golf') for (const c of d.cal || []) items.push({f, golf: c, date: new Date(c.start)});
+    else for (const ev of d.upcoming || []) items.push({f, ev, date: new Date(ev.date)});
+  }
+  items.sort((a, b) => a.date - b.date);
+  if (!items.length){ $('#list').innerHTML = `<p class="empty">${scores.length ? 'Nothing scheduled in the next two weeks.' : 'Loading…'}</p>`; return; }
+  const today = new Date().toDateString(), tmw = new Date(Date.now() + 864e5).toDateString();
+  let html = '', cur = null;
+  for (const it of items){
+    const k = it.date < new Date() ? today : it.date.toDateString();
+    if (k !== cur){
+      if (cur) html += '</section>';
+      const label = k === today ? 'Today' : k === tmw ? 'Tomorrow' : new Date(k).toLocaleDateString([], {weekday:'long', month:'short', day:'numeric'});
+      html += `<div class="day">${esc(label)}</div><section class="card">`;
+      cur = k;
+    }
+    const f = it.f;
+    if (it.golf){
+      const g = it.golf, end = g.end ? new Date(g.end) : null;
+      const md = d => d.toLocaleDateString([], {month:'short', day:'numeric'});
+      html += `<div class="srow" style="--c:${esc(f.c)}"><span class="tm">${it.date < new Date() ? 'Ongoing' : 'Starts'}</span><span class="sw"></span><span class="what">${esc(g.label)}<small>${esc(f.name)}${end ? `, ${esc(md(it.date))} to ${esc(md(end))}` : ''}</small></span></div>`;
+      continue;
+    }
+    const ev = it.ev, comp = ev.competitions?.[0] || {};
+    const us = comp.competitors?.find(c => isUs(c, f)), them = comp.competitors?.find(c => !isUs(c, f));
+    const st = statusOf(ev).type || {};
+    const tv = comp.broadcasts?.[0]?.media?.shortName || comp.broadcasts?.[0]?.names?.[0] || comp.geoBroadcasts?.[0]?.media?.shortName || '';
+    const time = st.state === 'in' ? 'Live' : (ev.timeValid === false || comp.timeValid === false) ? 'TBD' : clock(ev.date);
+    const opp = them ? `${us?.homeAway === 'home' ? 'vs' : 'at'} ${them.team?.shortDisplayName || them.team?.displayName || them.team?.abbreviation}` : (ev.shortName || ev.name || '');
+    html += `<div class="srow tap" role="button" tabindex="0" data-open="${esc(keyOf(f))}|${esc(ev.id)}" style="--c:${esc(f.c)}">
+      <span class="tm${st.state === 'in' ? ' live' : ''}">${esc(time)}</span><span class="sw"></span>
+      <span class="what">${esc(f.name)} ${esc(opp)}${tv ? `<small>${esc(tv)}</small>` : ''}</span></div>`;
+  }
+  if (cur) html += '</section>';
+  $('#list').innerHTML = html;
+}
+
+/* ---------- Team news and injuries ---------- */
+const ago = d => { const m = Math.round((Date.now() - new Date(d)) / 6e4); return m < 60 ? `${Math.max(m, 1)}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : `${Math.round(m / 1440)}d ago`; };
+async function loadInjuries(f){
+  try {
+    const d = await getJSON(`${api(f)}/injuries`);
+    const t = (d.injuries || []).find(x => String(x.id) === String(f.id) || String(x.team?.id) === String(f.id) || x.displayName === f.name);
+    if (t) return t.injuries || [];
+  } catch {}
+  const ev = scores.find(x => x.key === keyOf(f))?.next;
+  if (ev){
+    try {
+      const d = await getJSON(`${api(f)}/summary?event=${ev.id}`);
+      const t = (d.injuries || []).find(x => String(x.team?.id) === String(f.id));
+      if (t) return t.injuries || [];
+    } catch {}
+  }
+  return null;
+}
+async function openTeam(key){
+  const f = favByKey(key); if (!f) return;
+  detail = null; clearTimeout(detailTimer);
+  $('#sheetTitle').textContent = f.name;
+  $('#sheetBody').innerHTML = '<p class="empty">Loading…</p>';
+  $('#sheet').hidden = false; document.body.style.overflow = 'hidden';
+  const [news, inj] = await Promise.all([getJSON(`${api(f)}/news?team=${f.id}&limit=10`).catch(() => null), loadInjuries(f)]);
+  if ($('#sheet').hidden || $('#sheetTitle').textContent !== f.name || detail) return;
+  const arts = news?.articles || [];
+  const band = t => `<section class="card" style="--c:${esc(f.c)};--a:${esc(f.a)}"><div class="band"><h2>${t}</h2></div><div class="body">`;
+  let h = band('Latest news') +
+    (arts.length ? arts.map(a => { const href = a.links?.web?.href, img = a.images?.[0]?.url;
+      return `<a class="news" ${href ? `href="${esc(href)}" target="_blank" rel="noopener"` : ''}>${img ? `<img src="${esc(img)}" alt="">` : ''}<span><b>${esc(a.headline)}</b>${a.description ? `<small>${esc(a.description)}</small><br>` : ''}<small>${a.published ? esc(ago(a.published)) : ''}</small></span></a>`; }).join('')
+      : '<p class="empty">No recent news found.</p>') + `</div></section>`;
+  h += band('Injury report') +
+    (inj === null ? `<p class="empty">An injury report isn't available for this team${LEAGUES[f.league]?.college ? '. Most colleges don\'t publish one' : ''}.</p>`
+     : !inj.length ? '<p class="empty">No injuries reported.</p>'
+     : inj.map(i => { const a = i.athlete || {}, status = i.status || i.type?.description || '';
+        const body = [i.details?.type, i.details?.detail].filter(Boolean).join(', ');
+        const ret = i.details?.returnDate ? `Expected back ${new Date(i.details.returnDate).toLocaleDateString([], {month:'short', day:'numeric'})}` : '';
+        return `<div class="inj">${esc(a.displayName || a.fullName)} <span style="color:var(--muted);font-size:13px">${esc(a.position?.abbreviation || '')}</span>, <span class="st${/out|injured reserve/i.test(status) ? ' out' : ''}">${esc(status)}</span>${body || ret ? `<small>${esc([body, ret].filter(Boolean).join('. '))}</small>` : ''}${i.shortComment ? `<small>${esc(i.shortComment)}</small>` : ''}</div>`; }).join('')) +
+    `</div></section>`;
+  $('#sheetBody').innerHTML = h;
 }
 
 /* ---------- League scores ---------- */
@@ -756,18 +884,19 @@ function renderScores(){
       : favs.length ? '<p class="empty">Loading…</p>' : '<p class="empty">Add favorites in the Favorites tab.</p>');
 }
 function render(){
-  $('#title').textContent = {scores:'Scores', league:'League', standings:'Standings', settings:'Favorites'}[view];
+  $('#title').textContent = {scores:'Scores', schedule:'Schedule', league:'League', standings:'Standings', settings:'Favorites'}[view];
   $('#refresh').style.visibility = view === 'settings' ? 'hidden' : 'visible';
   document.querySelectorAll('nav button').forEach(b => b.toggleAttribute('aria-current', b.dataset.view === view));
   document.querySelectorAll('nav button[aria-current]').forEach(b => b.setAttribute('aria-current', 'page'));
   if (view === 'scores') renderScores();
+  else if (view === 'schedule') renderSchedule();
   else if (view === 'league') renderLeague();
   else if (view === 'standings') renderStandings();
   else renderSettings();
   setUpdated();
 }
 function setUpdated(){
-  const t = view === 'standings' ? standings?.at : view === 'league' ? lgAt : scoresAt;
+  const t = view === 'standings' ? standings?.at : view === 'schedule' ? scoresAt : view === 'league' ? lgAt : scoresAt;
   $('#updated').textContent = view === 'settings' ? 'Tap ↑ ↓ to reorder' : t ? 'Updated ' + clock(t) : 'Loading…';
 }
 let busy = false;
@@ -779,7 +908,7 @@ async function refresh(){
     else if (view === 'league'){ await loadLeague(); }
     else {
       const res = await Promise.all(favs.map(f =>
-        (f.kind === 'golf' ? loadGolf() : loadTeam(f)).catch(() => ({key: keyOf(f), error: true, live: false}))));
+        (f.kind === 'golf' ? loadGolf(f) : loadTeam(f)).catch(() => ({key: keyOf(f), error: true, live: false}))));
       scores = res; scoresAt = Date.now(); fromCache = false;
       store.set('cache:scores', scores); store.set('cache:scoresAt', scoresAt);
     }
@@ -795,20 +924,21 @@ async function refresh(){
 }
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-open],[data-player],[data-act],nav button');
+  const t = e.target.closest('[data-open],[data-team],[data-player],[data-act],nav button');
   if (!t) return;
   if (t.matches('nav button')){
     view = t.dataset.view; window.scrollTo(0, 0); render();
     if (view === 'standings' && (!standings || Date.now() - standings.at > 600000)) refresh();
-    if (view === 'scores' && Date.now() - scoresAt > 60000) refresh();
+    if ((view === 'scores' || view === 'schedule') && Date.now() - scoresAt > 60000) refresh();
     if (view === 'league' && (!lgData || Date.now() - lgAt > 60000)) refresh();
     return;
   }
+  if (t.dataset.team){ openTeam(t.dataset.team); return; }
   if (t.dataset.open){ const [k, id] = t.dataset.open.split('|'); openGame(k, id); return; }
   if (t.dataset.player){ const id = t.dataset.player; openPlayers.has(id) ? openPlayers.delete(id) : openPlayers.add(id); renderScores(); return; }
   const act = t.dataset.act, i = Number(t.dataset.i);
   if (act === 'lgprev' || act === 'lgnext'){ lgOffset += act === 'lgprev' ? -1 : 1; lgData = null; renderLeague(); refresh(); }
-  else if (act === 'golfall'){ golfShowAll = !golfShowAll; renderScores(); }
+  else if (act === 'golfall'){ const k = t.dataset.key; golfShowAll.has(k) ? golfShowAll.delete(k) : golfShowAll.add(k); renderScores(); }
   else if (act === 'parent'){ const k = t.dataset.key; openParents.has(k) ? openParents.delete(k) : openParents.add(k); renderStandings(); }
   else if (act === 'up' && i > 0){ [favs[i - 1], favs[i]] = [favs[i], favs[i - 1]]; saveFavs(); renderSettings(); }
   else if (act === 'down' && i < favs.length - 1){ [favs[i + 1], favs[i]] = [favs[i], favs[i + 1]]; saveFavs(); renderSettings(); }
@@ -820,7 +950,7 @@ document.addEventListener('click', e => {
     if (!favs.some(x => keyOf(x) === keyOf(f))){ favs.push(f); saveFavs(); standings = null; scoresAt = 0; }
     teamList = []; teamLeague = ''; renderSettings();
   }
-  else if (act === 'addgolf'){ favs.push({kind:'golf', name:'PGA Tour', c:'#1D3B2A', a:'#C9A94B'}); saveFavs(); scoresAt = 0; standings = null; renderSettings(); }
+  else if (act === 'addgolf'){ const tr = $('#tour')?.value; if (!TOURS[tr]) return; favs.push(golfFav(tr)); saveFavs(); scoresAt = 0; standings = null; renderSettings(); }
   else if (act === 'addgolfer'){
     const v = $('#golfer').value.trim();
     if (v && !golfers.some(g => norm(g) === norm(v))){ golfers.push(v); saveFavs(); }
