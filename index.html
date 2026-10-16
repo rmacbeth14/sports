@@ -91,7 +91,7 @@ tr:first-child td{border-top:0}
 a{color:var(--link)}
 
 nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
-nav button{flex:1;max-width:120px;border:0;background:none;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);cursor:pointer}
+nav button{flex:1;max-width:100px;font-size:11px !important;border:0;background:none;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);cursor:pointer}
 nav button[aria-current="page"]{color:var(--link);font-weight:600}
 
 #sheet{position:fixed;inset:0;background:var(--bg);z-index:10;overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -141,6 +141,28 @@ nav button[aria-current="page"]{color:var(--link);font-weight:600}
 .inj .st{font-weight:600}
 .inj .st.out{color:var(--live)}
 .inj small{display:block;color:var(--muted);font-size:13px}
+.pills{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;margin:0 -2px 4px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{flex:none;min-width:116px;text-align:left;border:0;background:var(--surface);border-radius:12px;padding:8px 10px;box-shadow:0 0 0 1px var(--line);cursor:pointer;display:flex;flex-direction:column;gap:1px;font-size:13px;color:var(--muted)}
+.pill b{color:var(--ink);font-size:15px}
+.pill[aria-pressed="true"]{box-shadow:0 0 0 2px var(--link)}
+.pill.hr{min-width:72px;align-items:center;text-align:center}
+.pill .best{color:var(--up);font-weight:600}
+.wxhead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.big2{font-family:var(--cond);font-weight:700;font-size:28px;line-height:1.1}
+.wxgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;font-size:16px}
+.wxgrid small{display:block;font-size:12px;color:var(--muted)}
+.m{color:var(--muted)}
+.wxgrid .m{font-size:13px}
+.form2{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+.form2 label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.form2 select,.form2 input[type=number]{width:100%;font:inherit;font-size:16px;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);margin:0 0 6px}
+.form2 .chk{flex-direction:row;align-items:center;gap:8px;font-size:15px;color:var(--ink)}
+.chk input{width:22px;height:22px}
+.answer{margin-top:10px;padding:12px;border-radius:10px;background:color-mix(in srgb,var(--link) 10%,transparent)}
+table.clubs{font-size:15px}
+table.clubs td,table.clubs th{padding:6px 3px}
+input[type=number]{font:inherit;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 .setrow{display:flex;align-items:center;gap:6px;padding:8px 0;border-top:1px solid var(--line)}
 .setrow:first-child{border-top:0}
 .setrow .sw{width:14px;height:28px;border-radius:4px;background:var(--c);flex:none}
@@ -170,6 +192,7 @@ select,input[type=text]{width:100%;font:inherit;padding:10px;border-radius:10px;
   <button data-view="schedule"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Schedule</button>
   <button data-view="league"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>League</button>
   <button data-view="standings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Standings</button>
+  <button data-view="weather"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 22V3"/><path d="M5 4h11l-3 4 3 4H5"/><path d="M15 17h6M13 20h6"/></svg>Weather</button>
   <button data-view="settings"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17.3l-6.2 3.7 1.6-7L2 9.2l7.2-.6L12 2l2.8 6.6 7.2.6-5.4 4.8 1.6 7z"/></svg>Favorites</button>
 </nav>
 
@@ -795,6 +818,236 @@ async function openTeam(key){
   $('#sheetBody').innerHTML = h;
 }
 
+/* ---------- Golf weather ---------- */
+const DEFAULT_CLUBS = [['Driver',270],['5 wood',240],['3 hybrid',230],['4 hybrid',220],['4 iron',205],['5 iron',195],['6 iron',180],['7 iron',165],['8 iron',155],['9 iron',140],['PW',125],['52°',110],['58°',80]];
+let clubs = store.get('clubs', DEFAULT_CLUBS);
+let wxCourses = store.get('wxCourses', [{name:'Franklin, MI', lat:42.5223, lon:-83.3060}]);
+let wxSel = store.get('wxSel', 0);
+const wx = {day:0, hourIdx:null, dir:store.get('wxDir', ''), slope:0, target:'', cold:false, manage:false, results:[], clubsOpen:false};
+const wxData = {};
+let wxAt = 0, tourney = null, tourneyTried = false;
+const BASE_T = 70, BASE_P = 1013.25, BASE_RH = 50;   // assumed sim baseline: 70°F, sea level
+const clubType = n => /driver|wood/i.test(n) ? 'wood' : /hybrid/i.test(n) ? 'hybrid' : /iron/i.test(n) ? 'iron' : 'wedge';
+const DRIFT = {wood:.06, hybrid:.05, iron:.045, wedge:.05};   // yds of drift per mph per 10 yds of distance
+const SLOPE = {wood:1.1, hybrid:1.05, iron:1, wedge:.9};       // flatter landings feel elevation more
+const DIRS = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+const dirName = deg => DIRS[Math.round(((deg % 360) + 360) % 360 / 22.5) % 16];
+const ckey = c => `${c.lat.toFixed(3)},${c.lon.toFixed(3)}`;
+const allCourses = () => [...wxCourses, ...(tourney ? [tourney] : [])];
+const curCourse = () => { const l = allCourses(); if (wxSel >= l.length) wxSel = 0; return l[wxSel]; };
+const fmtHour = h => `${h % 12 || 12} ${h < 12 ? 'AM' : 'PM'}`;
+const hourOf = s => Number(s.slice(11, 13));
+const tParse = s => Date.parse(s.length === 10 ? s + 'T00:00Z' : s + 'Z');
+function density(tc, p, rh){
+  const es = 6.1078 * Math.pow(10, 7.5 * tc / (tc + 237.3)), pv = rh / 100 * es, pd = p - pv, tk = tc + 273.15;
+  return (pd * 100) / (287.05 * tk) + (pv * 100) / (461.5 * tk);
+}
+const RHO0 = density((BASE_T - 32) * 5 / 9, BASE_P, BASE_RH);
+
+function wxURL(c){
+  return `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}` +
+    `&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation_probability,precipitation,surface_pressure,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index` +
+    `&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max` +
+    `&past_days=2&forecast_days=7&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto`;
+}
+async function findTourney(){
+  tourneyTried = true;
+  const ev = scores.find(d => d.key === 'golf:pga')?.ev;
+  if (!ev || statusOf(ev).type?.state === 'post') return;
+  const a = ev.competitions?.[0]?.venue?.address || ev.courses?.[0]?.address || ev.venue?.address || {};
+  if (!a.city) return;
+  try {
+    const g = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(a.city)}&count=10&language=en&format=json`);
+    const st = norm(a.state);
+    const r = (g.results || []).find(x => st && (norm(x.admin1) === st || norm(x.admin1_code) === st)) || g.results?.[0];
+    if (r) tourney = {name: ev.name, place: [a.city, a.state].filter(Boolean).join(', '), lat: r.latitude, lon: r.longitude, start: ev.date, end: ev.endDate, isTourney: true};
+  } catch {}
+}
+async function loadWeather(){
+  if (!tourneyTried) await findTourney();
+  const list = [curCourse(), tourney].filter(Boolean);
+  await Promise.all(list.map(async c => {
+    try { wxData[ckey(c)] = await getJSON(wxURL(c)); } catch { if (!wxData[ckey(c)]) wxData[ckey(c)] = {error: true}; }
+  }));
+  wxAt = Date.now();
+}
+
+function dayInfo(d){
+  const off = (d.utc_offset_seconds || 0) * 1000, nowLoc = Date.now() + off;
+  const today = new Date(nowLoc).toISOString().slice(0, 10);
+  const days = d.daily.time.map((t, i) => ({t, i})).filter(x => x.t >= today);
+  return {nowLoc, today, days};
+}
+function hoursFor(d, day, nowLoc){
+  const di = d.daily.time.indexOf(day);
+  const sr = hourOf(d.daily.sunrise[di]), ss = hourOf(d.daily.sunset[di]);
+  const curHourStart = Math.floor(nowLoc / 36e5) * 36e5;
+  return d.hourly.time.map((t, i) => ({t, i})).filter(x => x.t.startsWith(day) && hourOf(x.t) >= sr && hourOf(x.t) <= ss && tParse(x.t) >= curHourStart);
+}
+function bestTee(d, day, nowLoc){
+  const hrs = hoursFor(d, day, nowLoc), H = d.hourly;
+  const di = d.daily.time.indexOf(day), ss = hourOf(d.daily.sunset[di]);
+  const score = i => H.wind_speed_10m[i] + .3 * H.wind_gusts_10m[i] + .3 * (H.precipitation_probability[i] ?? 0) + .4 * Math.abs(H.temperature_2m[i] - 72) + (H.precipitation[i] > 0 ? 10 : 0);
+  let best = null;
+  for (const {t, i} of hrs){
+    if (hourOf(t) > ss - 4) break;
+    const w = [0, 1, 2, 3].map(k => i + k).filter(k => k < H.time.length);
+    const s = w.reduce((a, k) => a + score(k), 0) / w.length;
+    if (!best || s < best.s) best = {s, i, h: hourOf(t)};
+  }
+  return best;
+}
+function airAt(d, i){
+  const H = d.hourly, tf = H.temperature_2m[i], tc = (tf - 32) * 5 / 9, rh = H.relative_humidity_2m[i] ?? 50;
+  const p = H.surface_pressure[i] || 1013.25 * Math.pow(1 - 2.25577e-5 * (d.elevation || 0), 5.25588);
+  let f = 1 - .5 * (density(tc, p, rh) / RHO0 - 1);
+  if (wx.cold) f -= .0008 * Math.max(0, 70 - tf);
+  return {f, tf, p, rh};
+}
+function calcClub(name, yds, ctx){
+  const type = clubType(name), base = yds * ctx.air, W = ctx.wind;
+  const slopeAdj = ctx.slopeFt / 3 * SLOPE[type];
+  const r = {calm: base - slopeAdj, into: base * (1 - .01 * W) - slopeAdj, down: base * (1 + .005 * W) - slopeAdj, drift: DRIFT[type] * W * yds / 10};
+  if (ctx.shotDir !== null){
+    const a = (ctx.windFrom - ctx.shotDir) * Math.PI / 180, head = W * Math.cos(a), cross = W * Math.sin(a);
+    r.shot = base * (head > 0 ? 1 - .01 * head : 1 - .005 * head) - slopeAdj;
+    r.sdrift = DRIFT[type] * Math.abs(cross) * yds / 10;
+    r.side = cross > 0 ? 'L' : 'R';
+  }
+  return r;
+}
+
+function renderWeather(){
+  const list = allCourses(), c = curCourse(), d = c && wxData[ckey(c)];
+  let html = `<section class="card"><div class="body"><div class="ctrl">
+    <select id="wxc" aria-label="Course">${list.map((x, i) => `<option value="${i}" ${i === wxSel ? 'selected' : ''}>${esc(x.isTourney ? 'This week: ' + x.name : x.name)}</option>`).join('')}</select>
+    <button class="ib" data-act="wxmanage" aria-label="Manage courses" style="width:auto;padding:0 12px;height:44px">${wx.manage ? 'Done' : 'Courses'}</button></div>`;
+  if (wx.manage){
+    html += `<div class="subhead">Your courses</div>` + wxCourses.map((x, i) => `<div class="setrow"><span class="n">${esc(x.name)}</span><button class="ib" data-act="wxrm" data-i="${i}" aria-label="Remove ${esc(x.name)}" ${wxCourses.length < 2 ? 'disabled' : ''}>✕</button></div>`).join('') +
+      `<div class="subhead">Add a course</div>
+      <input type="text" id="wxname" placeholder="Course name, like Oakland Hills" autocomplete="off">
+      <input type="text" id="wxq" placeholder="Town or city where it is" autocomplete="off">
+      <div class="ctrl"><button class="btn" data-act="wxsearch">Search town</button><button class="btn" data-act="wxgeo" style="background:none;color:var(--link);box-shadow:inset 0 0 0 1px var(--line)">Use my location</button></div>
+      ${wx.results.map((r, i) => `<div class="setrow tap" role="button" tabindex="0" data-act="wxadd" data-i="${i}"><span class="n">${esc(r.name)}<div style="font-size:13px;color:var(--muted)">${esc([r.admin1, r.country].filter(Boolean).join(', '))}</div></span><span style="color:var(--link);font-weight:600">Add</span></div>`).join('')}`;
+  }
+  html += `</div></section>`;
+  if (!d){ $('#list').innerHTML = html + '<p class="empty">Loading forecast…</p>'; return; }
+  if (d.error){ $('#list').innerHTML = html + `<p class="empty">The forecast couldn't load. Check your connection and tap refresh.</p>`; return; }
+
+  const {nowLoc, days} = dayInfo(d), H = d.hourly;
+  if (wx.day >= days.length) wx.day = 0;
+  if (wx.day === 0 && !wx.dayPicked && days.length > 1 && !hoursFor(d, days[0].t, nowLoc).length) wx.day = 1;
+  const day = days[wx.day].t;
+  const hrs = hoursFor(d, day, nowLoc);
+  // Day pills with best tee time
+  html += `<div class="pills">` + days.map((x, k) => {
+    const bt = bestTee(d, x.t, nowLoc), lbl = k === 0 ? 'Today' : new Date(tParse(x.t)).toLocaleDateString([], {weekday:'short', timeZone:'UTC'});
+    return `<button class="pill" data-act="wxday" data-i="${k}" aria-pressed="${k === wx.day}"><b>${esc(lbl)}</b>
+      <span>${Math.round(d.daily.temperature_2m_max[x.i])}° / ${Math.round(d.daily.temperature_2m_min[x.i])}°</span>
+      <span>Wind ${Math.round(d.daily.wind_speed_10m_max[x.i])}, rain ${d.daily.precipitation_probability_max[x.i] ?? 0}%</span>
+      <span class="best">${bt ? 'Best: ' + fmtHour(bt.h) : 'Too late today'}</span></button>`;
+  }).join('') + `</div>`;
+  if (!hrs.length){ $('#list').innerHTML = html + '<p class="empty">No daylight hours left on this day. Pick another day.</p>'; return; }
+  const bt = bestTee(d, day, nowLoc);
+  if (wx.hourIdx === null || !hrs.some(h => h.i === wx.hourIdx)) wx.hourIdx = (wx.day === 0 ? hrs[0] : (bt ? {i: bt.i} : hrs[0])).i;
+  const i = wx.hourIdx;
+  html += `<div class="pills hours">` + hrs.map(h => `<button class="pill hr" data-act="wxhour" data-i="${h.i}" aria-pressed="${h.i === i}">
+    <b>${fmtHour(hourOf(h.t))}</b><span>${Math.round(H.temperature_2m[h.i])}°</span><span>${Math.round(H.wind_speed_10m[h.i])} mph</span>${bt && bt.i === h.i ? '<span class="best">Best</span>' : ''}</button>`).join('') + `</div>`;
+
+  // Conditions
+  const a = airAt(d, i), w10 = H.wind_speed_10m[i], wdir = H.wind_direction_10m[i], W = w10 * 1.2;
+  const di = d.daily.time.indexOf(day);
+  const rain48 = H.time.reduce((s, t, k) => { const tt = tParse(t); return tt <= nowLoc && tt > nowLoc - 48 * 36e5 ? s + (H.precipitation[k] || 0) : s; }, 0);
+  const frost = H.time.some((t, k) => t.startsWith(day) && hourOf(t) <= 9 && H.temperature_2m[k] <= 34);
+  const elevFt = Math.round((d.elevation || 0) * 3.281);
+  const airPct = Math.round((a.f - 1) * 1000) / 10;
+  html += `<section class="card"><div class="body">
+    <div class="wxhead">
+      <svg width="56" height="56" viewBox="0 0 56 56" aria-label="Wind from ${dirName(wdir)}"><circle cx="28" cy="28" r="26" fill="none" stroke="var(--line)" stroke-width="2"/><text x="28" y="9" text-anchor="middle" font-size="8" fill="var(--muted)">N</text>
+        <g transform="rotate(${wdir + 180} 28 28)"><path d="M28 10 L35 26 L28 22 L21 26 Z" fill="var(--link)"/><line x1="28" y1="22" x2="28" y2="46" stroke="var(--link)" stroke-width="3" stroke-linecap="round"/></g></svg>
+      <div><div class="big2">${Math.round(w10)} mph <span style="font-size:18px;color:var(--muted)">from ${dirName(wdir)}</span></div>
+      <div class="status" style="margin:0">Gusts ${Math.round(H.wind_gusts_10m[i])} mph, about ${Math.round(W)} mph at ball height</div></div>
+    </div>
+    <div class="wxgrid">
+      <div><small>Temperature</small>${Math.round(a.tf)}°F <span class="m">feels ${Math.round(H.apparent_temperature[i])}°</span></div>
+      <div><small>Rain chance</small>${H.precipitation_probability[i] ?? 0}%</div>
+      <div><small>Humidity</small>${Math.round(a.rh)}%</div>
+      <div><small>UV index</small>${Math.round(H.uv_index[i] ?? 0)}</div>
+      <div><small>Air pressure</small>${a.p.toFixed(0)} hPa</div>
+      <div><small>Elevation</small>${elevFt.toLocaleString()} ft</div>
+      <div><small>Rain, past 48 hrs</small>${rain48.toFixed(2)} in</div>
+      <div><small>Sunrise / sunset</small>${esc(fmtTime(d.daily.sunrise[di]))} / ${esc(fmtTime(d.daily.sunset[di]))}</div>
+    </div>
+    ${frost ? '<div class="sit" style="margin-top:10px"><b>Frost delay possible on early tee times.</b></div>' : ''}
+    ${rain48 > .5 ? '<div class="sub">Recent rain: expect soft fairways, little rollout, and possible flyers from the rough.</div>' : ''}
+  </div></section>`;
+
+  // Calculator inputs
+  const shotDir = wx.dir === '' ? null : Number(wx.dir);
+  const ctx = {air: a.f, wind: W, windFrom: wdir, shotDir, slopeFt: Number(wx.slope) || 0};
+  html += `<section class="card"><div class="body"><div class="subhead">Plays like</div>
+    <div class="status" style="display:block;margin-bottom:10px">The air ${airPct === 0 ? 'plays like your baseline' : `plays ${Math.abs(airPct)}% ${airPct > 0 ? 'longer' : 'shorter'} than your baseline`} (temperature, humidity, pressure, and elevation combined${wx.cold ? ', plus a cold ball' : ''}).</div>
+    <div class="form2">
+      <label>Hitting toward<select id="wxdir"><option value="">Not set</option>${DIRS.map((n, k) => `<option value="${k * 22.5}" ${String(k * 22.5) === String(wx.dir) ? 'selected' : ''}>${n}</option>`).join('')}</select></label>
+      <label>Target elevation (ft)<input type="number" inputmode="numeric" id="wxslope" value="${esc(wx.slope || '')}" placeholder="+20 or -15"></label>
+      <label>Yardage to target<input type="number" inputmode="numeric" id="wxtarget" value="${esc(wx.target)}" placeholder="e.g. 155"></label>
+      <label class="chk"><input type="checkbox" id="wxcold" ${wx.cold ? 'checked' : ''}> Cold ball</label>
+    </div>`;
+  const results = clubs.map(([n, y]) => ({n, y, r: calcClub(n, y, ctx)}));
+  const tgt = Number(wx.target);
+  if (tgt > 0){
+    const exp = x => shotDir !== null ? x.r.shot : x.r.calm;
+    const pick = results.reduce((b, x) => Math.abs(exp(x) - tgt) < Math.abs(exp(b) - tgt) ? x : b);
+    const pl = Math.round(tgt * pick.y / exp(pick));
+    html += `<div class="answer"><div class="big2">${tgt} plays like ${pl}</div><div>Club: <b>${esc(pick.n)}</b>, expected ${Math.round(exp(pick))} yds${shotDir !== null ? `, drifting about ${Math.round(pick.r.sdrift)} yds ${pick.r.side === 'L' ? 'left' : 'right'}` : ''}${shotDir === null ? '. Set "Hitting toward" to include the wind' : ''}.</div></div>`;
+  }
+  html += `</div></section>`;
+
+  // Club table
+  html += `<section class="card"><div class="body"><div class="subhead">Your distances at ${fmtHour(hourOf(H.time[i]))}</div><div class="scroll"><table class="clubs">
+    <tr><th>Club</th><th class="num">Normal</th><th class="num">Calm</th>${shotDir !== null ? '<th class="num">This shot</th><th class="num">Drift</th>' : '<th class="num">Into</th><th class="num">Down</th><th class="num">Cross drift</th>'}</tr>` +
+    results.map(x => `<tr><td>${esc(x.n)}</td><td class="num m">${x.y}</td><td class="num">${Math.round(x.r.calm)}</td>` +
+      (shotDir !== null ? `<td class="num"><b>${Math.round(x.r.shot)}</b></td><td class="num">${Math.round(x.r.sdrift)} ${x.r.side}</td>`
+        : `<td class="num">${Math.round(x.r.into)}</td><td class="num">${Math.round(x.r.down)}</td><td class="num">${Math.round(x.r.drift)}</td>`) + `</tr>`).join('') +
+    `</table></div><div class="sub">Total distances, adjusted from a baseline of ${BASE_T}°F at sea level. Wind uses ${Math.round(W)} mph at ball height${ctx.slopeFt ? `, and the target is ${Math.abs(ctx.slopeFt)} ft ${ctx.slopeFt > 0 ? 'above' : 'below'} you` : ''}. Estimates for now; they get sharper once your launch data is added.</div>
+    <button class="link" data-act="wxclubs">${wx.clubsOpen ? 'Done editing distances' : 'Edit your distances'}</button>
+    ${wx.clubsOpen ? `<div style="margin-top:8px">${clubs.map(([n, y], k) => `<div class="setrow"><span class="n">${esc(n)}</span><input type="number" inputmode="numeric" id="club-${k}" value="${y}" style="width:90px;margin:0" aria-label="${esc(n)} distance"></div>`).join('')}
+      <button class="btn ghost" data-act="clubreset" style="margin-top:10px">Reset to original distances</button></div>` : ''}
+  </div></section>`;
+
+  // Tournament weather
+  if (tourney && !c.isTourney){
+    const td = wxData[ckey(tourney)];
+    if (td && !td.error){
+      const s = new Date(tourney.start).toISOString().slice(0, 10);
+      const e = tourney.end ? new Date(tourney.end).toISOString().slice(0, 10) : null;
+      const rows = td.daily.time.map((t, k) => ({t, k})).filter(x => x.t >= s && (e ? x.t <= e : x.t < new Date(tParse(s) + 4 * 864e5).toISOString().slice(0, 10))).slice(0, 4);
+      if (rows.length) html += `<section class="card" style="--c:#1D3B2A;--a:#C9A94B"><div class="band"><h2>${esc(tourney.name)}</h2><span class="rec">${esc(tourney.place)}</span></div><div class="body"><table>
+        <tr><th>Round</th><th class="num">High</th><th class="num">Wind</th><th class="num">Gusts</th><th class="num">Rain</th></tr>` +
+        rows.map((x, r) => `<tr><td>R${r + 1}, ${esc(new Date(tParse(x.t)).toLocaleDateString([], {weekday:'short', timeZone:'UTC'}))}</td><td class="num">${Math.round(td.daily.temperature_2m_max[x.k])}°</td><td class="num">${Math.round(td.daily.wind_speed_10m_max[x.k])}</td><td class="num">${Math.round(td.daily.wind_gusts_10m_max[x.k])}</td><td class="num">${td.daily.precipitation_probability_max[x.k] ?? 0}%</td></tr>`).join('') +
+        `</table><button class="link" data-act="wxtour">Open full tournament forecast</button></div></section>`;
+    }
+  }
+  $('#list').innerHTML = html;
+}
+function fmtTime(s){ const h = hourOf(s), m = s.slice(14, 16); return `${h % 12 || 12}:${m} ${h < 12 ? 'AM' : 'PM'}`; }
+function wxSaveCourses(){ store.set('wxCourses', wxCourses); store.set('wxSel', wxSel); }
+async function wxSearch(){
+  const q = $('#wxq').value.trim(); if (!q) return;
+  wx.pendingName = $('#wxname').value.trim();
+  try {
+    const g = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=6&language=en&format=json`);
+    wx.results = g.results || [];
+    if (!wx.results.length) alert('No places found. Try a nearby town name.');
+  } catch { alert('Search failed. Check your connection.'); }
+  renderWeather();
+  if (wx.pendingName && $('#wxname')) $('#wxname').value = wx.pendingName;
+}
+function wxAddCourse(c){
+  wxCourses.push(c); wxSel = wxCourses.length - 1; wx.results = []; wx.manage = false; wx.hourIdx = null; wx.day = 0;
+  wxSaveCourses(); renderWeather(); refresh();
+}
+
 /* ---------- League scores ---------- */
 const LEAGUE_GROUPS = {
   'college-football':        [['top25','Top 25'],['1','ACC'],['5','Big Ten'],['4','Big 12'],['9','Pac-12'],['8','SEC']],
@@ -884,19 +1137,20 @@ function renderScores(){
       : favs.length ? '<p class="empty">Loading…</p>' : '<p class="empty">Add favorites in the Favorites tab.</p>');
 }
 function render(){
-  $('#title').textContent = {scores:'Scores', schedule:'Schedule', league:'League', standings:'Standings', settings:'Favorites'}[view];
+  $('#title').textContent = {scores:'Scores', weather:'Golf weather', schedule:'Schedule', league:'League', standings:'Standings', settings:'Favorites'}[view];
   $('#refresh').style.visibility = view === 'settings' ? 'hidden' : 'visible';
   document.querySelectorAll('nav button').forEach(b => b.toggleAttribute('aria-current', b.dataset.view === view));
   document.querySelectorAll('nav button[aria-current]').forEach(b => b.setAttribute('aria-current', 'page'));
   if (view === 'scores') renderScores();
   else if (view === 'schedule') renderSchedule();
+  else if (view === 'weather') renderWeather();
   else if (view === 'league') renderLeague();
   else if (view === 'standings') renderStandings();
   else renderSettings();
   setUpdated();
 }
 function setUpdated(){
-  const t = view === 'standings' ? standings?.at : view === 'schedule' ? scoresAt : view === 'league' ? lgAt : scoresAt;
+  const t = view === 'weather' ? wxAt : view === 'standings' ? standings?.at : view === 'schedule' ? scoresAt : view === 'league' ? lgAt : scoresAt;
   $('#updated').textContent = view === 'settings' ? 'Tap ↑ ↓ to reorder' : t ? 'Updated ' + clock(t) : 'Loading…';
 }
 let busy = false;
@@ -906,6 +1160,7 @@ async function refresh(){
   try {
     if (view === 'standings'){ await refreshStandings(); }
     else if (view === 'league'){ await loadLeague(); }
+    else if (view === 'weather'){ await loadWeather(); }
     else {
       const res = await Promise.all(favs.map(f =>
         (f.kind === 'golf' ? loadGolf(f) : loadTeam(f)).catch(() => ({key: keyOf(f), error: true, live: false}))));
@@ -918,7 +1173,7 @@ async function refresh(){
     if (view !== 'settings') render();
     if (view === 'league' && !lgData) setTimeout(refresh, 0);
     clearTimeout(timer);
-    const anyLive = view === 'league' ? (lgData?.events || []).some(e => statusOf(e).type?.state === 'in') : scores.some(d => d.live);
+    const anyLive = view === 'weather' ? false : view === 'league' ? (lgData?.events || []).some(e => statusOf(e).type?.state === 'in') : scores.some(d => d.live);
     timer = setTimeout(refresh, anyLive ? 30000 : 300000);
   }
 }
@@ -931,12 +1186,29 @@ document.addEventListener('click', e => {
     if (view === 'standings' && (!standings || Date.now() - standings.at > 600000)) refresh();
     if ((view === 'scores' || view === 'schedule') && Date.now() - scoresAt > 60000) refresh();
     if (view === 'league' && (!lgData || Date.now() - lgAt > 60000)) refresh();
+    if (view === 'weather' && (!wxData[ckey(curCourse())] || Date.now() - wxAt > 900000)) refresh();
     return;
   }
   if (t.dataset.team){ openTeam(t.dataset.team); return; }
   if (t.dataset.open){ const [k, id] = t.dataset.open.split('|'); openGame(k, id); return; }
   if (t.dataset.player){ const id = t.dataset.player; openPlayers.has(id) ? openPlayers.delete(id) : openPlayers.add(id); renderScores(); return; }
   const act = t.dataset.act, i = Number(t.dataset.i);
+  if (act === 'wxday'){ wx.day = i; wx.dayPicked = true; wx.hourIdx = null; renderWeather(); return; }
+  if (act === 'wxhour'){ wx.hourIdx = i; renderWeather(); return; }
+  if (act === 'wxmanage'){ wx.manage = !wx.manage; wx.results = []; renderWeather(); return; }
+  if (act === 'wxsearch'){ wxSearch(); return; }
+  if (act === 'wxadd'){ const r = wx.results[i]; if (r) wxAddCourse({name: ($('#wxname')?.value.trim()) || [r.name, r.admin1].filter(Boolean).join(', '), lat: r.latitude, lon: r.longitude}); return; }
+  if (act === 'wxgeo'){
+    const nm = $('#wxname')?.value.trim();
+    if (!navigator.geolocation){ alert('Location isn\'t available on this device.'); return; }
+    navigator.geolocation.getCurrentPosition(p => wxAddCourse({name: nm || 'My location', lat: p.coords.latitude, lon: p.coords.longitude}),
+      () => alert('Couldn\'t get your location. Check that Safari has location access.'), {enableHighAccuracy: false, timeout: 10000});
+    return;
+  }
+  if (act === 'wxrm'){ wxCourses.splice(i, 1); wxSel = 0; wx.hourIdx = null; wxSaveCourses(); renderWeather(); refresh(); return; }
+  if (act === 'wxtour'){ wxSel = wxCourses.length; wx.day = 0; wx.hourIdx = null; window.scrollTo(0, 0); renderWeather(); return; }
+  if (act === 'wxclubs'){ wx.clubsOpen = !wx.clubsOpen; renderWeather(); return; }
+  if (act === 'clubreset'){ if (confirm('Reset all club distances to the originals?')){ clubs = JSON.parse(JSON.stringify(DEFAULT_CLUBS)); store.set('clubs', clubs); renderWeather(); } return; }
   if (act === 'lgprev' || act === 'lgnext'){ lgOffset += act === 'lgprev' ? -1 : 1; lgData = null; renderLeague(); refresh(); }
   else if (act === 'golfall'){ const k = t.dataset.key; golfShowAll.has(k) ? golfShowAll.delete(k) : golfShowAll.add(k); renderScores(); }
   else if (act === 'parent'){ const k = t.dataset.key; openParents.has(k) ? openParents.delete(k) : openParents.add(k); renderStandings(); }
@@ -961,6 +1233,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.tap')){ e.preventDefault(); e.target.click(); }
+  if (e.key === 'Enter' && e.target.id === 'wxq'){ e.preventDefault(); wxSearch(); }
   if (e.key === 'Enter' && e.target.id === 'golfer'){ e.preventDefault(); document.querySelector('[data-act="addgolfer"]').click(); }
   if (e.key === 'Escape' && !$('#sheet').hidden) closeGame();
 });
@@ -968,6 +1241,12 @@ document.addEventListener('change', e => {
   if (e.target.id === 'lg') pickLeague(e.target.value);
   if (e.target.id === 'lgl'){ lgSel = {league: e.target.value, group: 'top25'}; lgChanged(); }
   if (e.target.id === 'lgg'){ lgSel.group = e.target.value; lgChanged(); }
+  if (e.target.id === 'wxc'){ wxSel = Number(e.target.value); wx.day = 0; wx.dayPicked = false; wx.hourIdx = null; store.set('wxSel', wxSel); renderWeather(); if (!wxData[ckey(curCourse())]) refresh(); }
+  if (e.target.id === 'wxdir'){ wx.dir = e.target.value; store.set('wxDir', wx.dir); renderWeather(); }
+  if (e.target.id === 'wxslope'){ wx.slope = e.target.value; renderWeather(); }
+  if (e.target.id === 'wxtarget'){ wx.target = e.target.value; renderWeather(); }
+  if (e.target.id === 'wxcold'){ wx.cold = e.target.checked; renderWeather(); }
+  if (e.target.id?.startsWith('club-')){ const k = Number(e.target.id.slice(5)), v = Math.round(Number(e.target.value)); if (v > 0 && clubs[k]){ clubs[k][1] = v; store.set('clubs', clubs); } renderWeather(); }
 });
 $('#refresh').addEventListener('click', refresh);
 $('#sheetClose').addEventListener('click', closeGame);
